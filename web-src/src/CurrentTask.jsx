@@ -70,7 +70,7 @@ class CurrentTask extends React.Component {
         return (
             <div className="current-task">
                 <div>Current task: {this.state.task.name}</div>
-                <FormControl componentClass="select" onChange={(e) => this.onChange(e.target.value)} value={JSON.stringify(this.state.task)} >
+                <FormControl componentClass="select" onChange={(e) => this.onChange(e.target.value)} value={JSON.stringify(currentTaskType)} >
                     {
                         dropdownItems.map((item) => <TaskSelectOption key={ JSON.stringify(item) } item={item} />)
                     }
