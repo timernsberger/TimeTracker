@@ -1,0 +1,35 @@
+plugins {
+    id 'java'
+}
+
+group 'com.times6'
+version '0.1'
+
+dependencies {
+    compile project(':TimeTrackerService-service')
+}
+
+task clearWebContent(type: Delete) {
+    delete('static')
+}
+
+task compileWebContent(type: Exec, dependsOn: clearWebContent) {
+    workingDir './web-src'
+    commandLine 'cmd', '/c', 'npm', 'run', 'build'
+}
+
+task copyWebContent(type: Copy, dependsOn: compileWebContent) {
+    from './web-src/build'
+    into './static'
+}
+
+task bundleWebContent(type: Zip, dependsOn: copyWebContent) {
+    from('./web-src/build') {
+        into 'static'
+    }
+}
+
+task buildAll() {
+    dependsOn bundleWebContent
+    dependsOn assemble
+}

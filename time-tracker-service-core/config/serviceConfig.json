@@ -1,0 +1,6 @@
+{
+    "port": "8080",
+    "useStaticAssets": "false",
+    "development": "true",
+    "defaultUserId": ""
+}

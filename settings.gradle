@@ -1,0 +1,4 @@
+rootProject.name = 'TimeTrackerService'
+
+include ':TimeTrackerService-service'
+project(':TimeTrackerService-service').projectDir = file('time-tracker-service-core')
