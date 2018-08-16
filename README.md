@@ -1,4 +1,35 @@
 # TimeTracker
 This is a sample project that demonstrates how to use React, JAX-RS, and AWS services to create a simple database-backed website.
 
-Documentation coming soon!
+# Quick Start
+
+1. Install the build systems if you don't have them already. You'll need [NPM](https://www.npmjs.com/) to generate the website and [Gradle](https://gradle.org/) for the server.
+1. Set up an [Amazon Web Services](https://aws.amazon.com/) account. You'll also need an IAM user with an access key. For starters, the user will only need the "dynamodb:CreateTable" permission to set up the tables.
+1. Put the access key and secret for your IAM user in  `/config/databaseConfig.json`. You'll also need to choose an AWS region for your tables and add that to the config.
+1. Build the service using the "jar" Gradle task in the time-tracker-service-core project. This will bundle the service's code and its dependencies into `/time-tracker-service-core/build/libs/TimeTrackerService-<version>.jar`.
+1. Create the database tables using the `com.times6.timeTracker.db.DatabaseCreator` class contained in the jar from the previous step. Note that the default class in the jar will run the service instead of creating tables, so you'll need to explicitly specify the name of the database creator class with the jar on the classpath.
+1. Give your IAM user permissions to get, put, update, delete, and query records for the two tables you created. You should also remove create table permissions at this point; the less permissions you leave open the better.
+1. Generate the website by using the "copyWebContent" Gradle task in the project's root folder. This will place the generated content in `/static`.
+1. Run the service from the project's root directory using the jar you created earlier. The jar is set up to run the service's main class by default so you only need to run `java -jar <path/to/jar>`. It's important to run this from the project root because the service will expect to find the config and static folders in the directory from which it's run.
+
+# Introduction
+
+Computers are useful because they allow us to handle data more effectively than we could do by hand or in our heads. Consider the use case for the TimeTracker application: I want to keep track of how I spend my time. All I really need is a clock to tell me when I started or finished a task, and some place to record that, such as a piece of paper. Writing down start and end times is simple, but trying to calculate totals or find patterns involves increasing amounts of error-prone mental or written math. This is where computers have the advange. A computer can perform this task repeatedly, reliably, and much more quickly then we can. It takes time to instruct a computer in how to do this, but once written a program can pay that time back, and then some.
+
+What do we need in order to make a time tracking program? First of all, we need something in which to record data, a digital equivalent to paper in the previous example. Our data store needs to be durable, since we're planning on keeping a history of our tasks. Second, we need a way to read, write, and analyze that data, or more generally a way to interface with our data. We want these actions to be as simple as possible. The main reason we had to digitize our time tracking was to save effort, and the more difficult or tedious it is to use our program the less benefit we get. Additionally, there's nothing forcing us to use this application; if we don't like it, we'll probably stop using it, whether we intend to or not. 
+
+Based on the constraints listed so far, we could use a file we store on our computer and access it with an application like Microsoft Excel or some equivalent. Hard drives and solid state drives are plenty durable for our purposes. A spreadsheet application would allow us to easily enter numbers in an organized way so that it's easy both to read and write. Most spreadsheet applications also allow us to apply mathematical functions to our data, but the more complicated the functions the more these start to turn into mini-programs that we're writing ourselves inside of the spreadsheet application. The main drawback to this approach is that the file is local to whichever computer you put it on. In reality, we may not have that computer on hand any time we're doing a task we want to track. On the other hand, in this day and age we're very like to have some sort of device, whether it be a laptop or a smartphone. If we make our time tracker available through the Internet, we'll be able to update it wherever and whenever we like.
+
+To accomplish this, we need an extra piece. We already have storage for our data and an interface for recording and reviewing our data. However, with our data stored in a central location and our interface available on multiple devices, we need something that bridges the gap; something which can accept requests remotely while still being able to access the data store. Additionally, security is now very important. We don't want everyone knowing all the details we're recording about what we did when, so this bridge also need to make sure that we're the only ones accessing our data. In practice, there are also signficiant benefits to using this bridge layer to limit the ways in which the interface piece can access or modify data, but more on that later.
+
+Going back to the argument for a spreadsheet earlier, the three-part approach doesn't preclude the use of a spreadsheet program. Google Docs and Office 365 are two examples of companies taking this more distributed approach. So why not do our time tracking using one of those applications? Mainly, we can define our own ontology for our data. A spreadsheet is limited to a very simplistic view of data. Everything in a spreadsheet is a cell with a number or words in it. That's how it presents its data to us, and how we enter data. By making our own application, we can tailor the interface to show us not just a grid of numbers and words but cohesive bundles of data we can recognize as "tasks" or "work weeks". It also lets us apply our own logic, validation, and labeling, so there's no need to do mental mapping or checklists to make sure we put the right thing in the right place.
+
+The rest of this document describes the three pieces outlined above. Each section will cover general ideas about the responsibility of that component as well as common practices for implementation. Additionally, each section will act as a guide through the code included in this project which makes up that component. Finally, although not usually considered to be a component in and of itself, the last section covers additional bits and pieces that fit in with the three main components to make development and maintenance more manageable.
+
+# Data Storage
+
+# Managing Remote Access to Data
+
+# Showing and Accepting Data to/from Real People
+
+# Supporting Infrastructure
