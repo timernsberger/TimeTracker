@@ -31,5 +31,5 @@ task bundleWebContent(type: Zip, dependsOn: copyWebContent) {
 
 task buildAll() {
     dependsOn bundleWebContent
-    dependsOn assemble
+    dependsOn ':TimeTrackerService-service:jar'
 }

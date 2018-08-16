@@ -69,3 +69,7 @@ test.dependsOn copyNativeDeps
 test.doFirst {
     systemProperty "java.library.path", 'build/libs'
 }
+
+test {
+    useJUnitPlatform()
+}
