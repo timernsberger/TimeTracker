@@ -2,11 +2,11 @@ plugins {
     id 'java'
 }
 
-group 'com.times6'
+group 'com.times6.timetracker'
 version '0.1'
 
 dependencies {
-    compile project(':TimeTrackerService-service')
+    compile project(':service')
 }
 
 task clearWebContent(type: Delete) {
@@ -31,5 +31,5 @@ task bundleWebContent(type: Zip, dependsOn: copyWebContent) {
 
 task buildAll() {
     dependsOn bundleWebContent
-    dependsOn ':TimeTrackerService-service:jar'
+    dependsOn ':service:jar'
 }

@@ -1,0 +1,6 @@
+rootProject.name = 'database-dynamodb'
+
+include 'core'
+project(':core').projectDir = file('../core')
+include 'database-core'
+project(':database-core').projectDir = file('../database-core')

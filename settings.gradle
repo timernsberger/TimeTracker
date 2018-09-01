@@ -1,4 +1,8 @@
-rootProject.name = 'TimeTrackerService'
+rootProject.name = 'time-tracker'
 
-include ':TimeTrackerService-service'
-project(':TimeTrackerService-service').projectDir = file('time-tracker-service-core')
+include ':service'
+project(':service').projectDir = file('service')
+include 'database-dynamodb'
+include 'database-core'
+include 'core'
+
