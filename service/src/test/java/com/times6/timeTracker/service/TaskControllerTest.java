@@ -1,9 +1,7 @@
 package com.times6.timeTracker.service;
 
-import com.amazonaws.AmazonClientException;
 import com.times6.timeTracker.Task;
 import com.times6.timeTracker.db.TaskDao;
-import com.times6.timeTracker.db.dynamo.TaskRecord;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -25,6 +23,8 @@ import java.util.List;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -64,9 +64,8 @@ public class TaskControllerTest {
                 .name("get current task")
                 .timeStarted(Instant.now())
                 .build();
-        TaskRecord record = TaskRecord.fromTask(task, USER_ID);
 
-        when(taskDao.getLatest(USER_ID)).thenReturn(record);
+        when(taskDao.getLatest(USER_ID)).thenReturn(task);
 
         Task result = controller.getCurrentTask();
         assertThat(result, equalTo(task));
@@ -101,27 +100,27 @@ public class TaskControllerTest {
             verify(taskDao).getLatest(USER_ID);
 
             assertThat(result, equalTo(true));
-            ArgumentCaptor<TaskRecord> recordCaptor = ArgumentCaptor.forClass(TaskRecord.class);
-            verify(taskDao).save(recordCaptor.capture());
-            TaskRecord storedRecord = recordCaptor.getValue();
+            ArgumentCaptor<Task> recordCaptor = ArgumentCaptor.forClass(Task.class);
+            verify(taskDao).save(recordCaptor.capture(), any());
+            Task storedRecord = recordCaptor.getValue();
             assertThat(storedRecord.getCategory(), equalTo(task.getCategory()));
-            assertThat(storedRecord.getTaskName(), equalTo(task.getName()));
+            assertThat(storedRecord.getName(), equalTo(task.getName()));
             assertThat(storedRecord.getTimeStarted(), equalTo(task.getTimeStarted()));
-            assertThat(storedRecord.getUserId(), equalTo(USER_ID));
         }
 
         @Test
         public void completesCurrentTask() {
+            Instant now = Instant.now();
             Task newTask = Task.builder()
                     .category("Test")
                     .name("store task")
-                    .timeStarted(Instant.now().minus(10L, ChronoUnit.SECONDS))
+                    .timeStarted(now.minus(10L, ChronoUnit.SECONDS))
                     .build();
 
-            TaskRecord existingTask = TaskRecord.builder()
+            Task existingTask = Task.builder()
                     .category("Test")
-                    .taskName("run test case")
-                    .timeStarted(Instant.now().minus(1000L, ChronoUnit.SECONDS))
+                    .name("run test case")
+                    .timeStarted(now.minus(1000L, ChronoUnit.SECONDS))
                     .build();
 
             when(taskDao.getLatest(USER_ID)).thenReturn(existingTask);
@@ -131,15 +130,12 @@ public class TaskControllerTest {
             verify(taskDao).getLatest(USER_ID);
 
             assertThat(result, equalTo(true));
-            ArgumentCaptor<TaskRecord> recordCaptor = ArgumentCaptor.forClass(TaskRecord.class);
-            verify(taskDao, times(2)).save(recordCaptor.capture());
-            List<TaskRecord> storedRecords = recordCaptor.getAllValues();
-            assertThat(storedRecords, hasSize(2));
-            TaskRecord updatedExistingTask = storedRecords.get(0);
-            assertThat(updatedExistingTask.getUserId(), equalTo(existingTask.getUserId()));
-            assertThat(updatedExistingTask.getTimeStarted(), equalTo(existingTask.getTimeStarted()));
-            assertThat(updatedExistingTask.getTimeEnded(), notNullValue());
-            // TODO: mock end time either with power mocking of Instant.now() or injecting a "now" provide
+            ArgumentCaptor<Instant> endTimeCaptor = ArgumentCaptor.forClass(Instant.class);
+            verify(taskDao).completeTask(eq(USER_ID), eq(existingTask.getTimeStarted()), endTimeCaptor.capture());
+            Instant savedEndTime = endTimeCaptor.getValue();
+            // TODO: mock end time either with power mocking of Instant.now() or injecting a "now" provider
+            assertThat(savedEndTime, greaterThanOrEqualTo(now));
+            verify(taskDao).save(eq(newTask), eq(USER_ID));
         }
 
         @Test
@@ -152,11 +148,11 @@ public class TaskControllerTest {
 
             when(taskDao.getLatest(USER_ID)).thenReturn(null);
 
-            doThrow(new AmazonClientException("")).when(taskDao).save(Mockito.any(TaskRecord.class));
+            doThrow(new RuntimeException("")).when(taskDao).save(any(), any());
 
-            assertThrows(AmazonClientException.class, () -> controller.addTask(task));
+            assertThrows(RuntimeException.class, () -> controller.addTask(task));
 
-            verify(taskDao).save(Mockito.any(TaskRecord.class));
+            verify(taskDao).save(any(), any());
         }
     }
 
@@ -165,12 +161,11 @@ public class TaskControllerTest {
         long start = 100L;
         long end = 100_000L;
 
-        TaskRecord record = TaskRecord.builder()
-                .userId(USER_ID)
+        Task record = Task.builder()
                 .timeStarted(Instant.ofEpochSecond(1000L))
                 .timeEnded(Instant.ofEpochSecond(1002L))
                 .category("test")
-                .taskName("name tasks")
+                .name("name tasks")
                 .build();
 
         when(taskDao.getRange(eq(USER_ID), Mockito.any(Instant.class), Mockito.any(Instant.class))).thenReturn(Arrays.asList(record));
@@ -180,7 +175,7 @@ public class TaskControllerTest {
         assertThat(response.getEntity(), instanceOf(List.class));
         List<Task> responsePayload = (List<Task>)response.getEntity();
         assertThat(responsePayload, hasSize(1));
-        assertThat(responsePayload, containsInAnyOrder(record.toTask()));
+        assertThat(responsePayload, containsInAnyOrder(record));
         verify(taskDao).getRange(USER_ID, Instant.ofEpochSecond(start), Instant.ofEpochSecond(end));
     }
 }

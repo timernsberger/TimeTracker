@@ -45,8 +45,7 @@ public class TaskController {
 		String userId = getUserId();
 		Task latestTask = taskDao.getLatest(userId);
 		if(latestTask != null && latestTask.getTimeEnded() == null) {
-			latestTask.setTimeEnded(Instant.now());
-			taskDao.save(latestTask, userId);
+			taskDao.completeTask(userId, latestTask.getTimeStarted(), Instant.now());
 		}
 		if(task.getTimeStarted() == null) {
 			task.setTimeStarted(Instant.now());

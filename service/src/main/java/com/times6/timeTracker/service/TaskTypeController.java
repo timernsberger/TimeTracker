@@ -1,7 +1,6 @@
 package com.times6.timeTracker.service;
 
 import java.util.Collection;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -13,8 +12,6 @@ import javax.ws.rs.core.Response.Status;
 
 import com.times6.timeTracker.TaskType;
 import com.times6.timeTracker.db.TaskTypeDao;
-import com.times6.timeTracker.db.dynamo.DynamoTaskTypeDao;
-import com.times6.timeTracker.db.dynamo.TaskTypeRecord;
 
 @Path("/task/type")
 @Produces(MediaType.APPLICATION_JSON)

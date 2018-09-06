@@ -1,8 +1,7 @@
 package com.times6.timeTracker.service;
 
 import com.times6.timeTracker.TaskType;
-import com.times6.timeTracker.db.dynamo.DynamoTaskTypeDao;
-import com.times6.timeTracker.db.dynamo.TaskTypeRecord;
+import com.times6.timeTracker.db.TaskTypeDao;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,9 +18,7 @@ import java.util.Collection;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.mockito.Mockito.*;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 public class TaskTypeControllerTest {
@@ -31,7 +28,7 @@ public class TaskTypeControllerTest {
     private HttpServletRequest request;
 
     @Mock
-    private DynamoTaskTypeDao dao;
+    private TaskTypeDao dao;
 
     private TaskTypeController controller;
 
@@ -60,24 +57,22 @@ public class TaskTypeControllerTest {
 
         controller.add(taskType);
 
-        ArgumentCaptor<TaskTypeRecord> captor = ArgumentCaptor.forClass(TaskTypeRecord.class);
-        verify(dao).save(captor.capture());
-        TaskTypeRecord record = captor.getValue();
-        assertThat(record.toTaskType(), equalTo(taskType));
-        assertThat(record.getRangeKey(), containsString(taskType.getCategory()));
-        assertThat(record.getRangeKey(), containsString(taskType.getName()));
+        ArgumentCaptor<TaskType> captor = ArgumentCaptor.forClass(TaskType.class);
+        verify(dao).save(captor.capture(), any());
+        TaskType record = captor.getValue();
+        assertThat(record, equalTo(taskType));
     }
 
     @Test
     public void getsAllTaskTypesThatBelongToTheUser() {
-        TaskTypeRecord user1 = createRecord("Test", "run tests");
-        TaskTypeRecord user2 = createRecord("test", "run some more tests");
+        TaskType user1 = createRecord("Test", "run tests");
+        TaskType user2 = createRecord("test", "run some more tests");
 
         when(dao.getAll(USER_ID)).thenReturn(Arrays.asList(user1, user2));
 
         Collection<TaskType> results = controller.getAll();
 
-        assertThat(results, containsInAnyOrder(user1.toTaskType(), user2.toTaskType()));
+        assertThat(results, containsInAnyOrder(user1, user2));
         verify(dao).getAll(USER_ID);
     }
 
@@ -90,20 +85,16 @@ public class TaskTypeControllerTest {
 
         controller.remove(taskType);
 
-        ArgumentCaptor<TaskTypeRecord> captor = ArgumentCaptor.forClass(TaskTypeRecord.class);
-        verify(dao).remove(captor.capture());
-        TaskTypeRecord record = captor.getValue();
-        assertThat(record.toTaskType(), equalTo(taskType));
-        assertThat(record.getRangeKey(), containsString(taskType.getCategory()));
-        assertThat(record.getRangeKey(), containsString(taskType.getName()));
+        ArgumentCaptor<TaskType> captor = ArgumentCaptor.forClass(TaskType.class);
+        verify(dao).remove(captor.capture(), any());
+        TaskType record = captor.getValue();
+        assertThat(record, equalTo(taskType));
     }
 
-    private TaskTypeRecord createRecord(String category, String name) {
-        TaskTypeRecord record = TaskTypeRecord.builder()
+    private TaskType createRecord(String category, String name) {
+        return TaskType.builder()
                 .category(category)
                 .name(name)
                 .build();
-        record.setRangeKey(record.getCategory() + "|" + record.getName());
-        return record;
     }
 }

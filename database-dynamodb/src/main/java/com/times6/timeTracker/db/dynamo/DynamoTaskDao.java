@@ -2,6 +2,7 @@ package com.times6.timeTracker.db.dynamo;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperConfig;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
 import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedQueryList;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
@@ -57,6 +58,17 @@ public class DynamoTaskDao implements TaskDao {
         List<TaskRecord> records = new ArrayList<>(tasks);
         log.info("got {} tasks", tasks.size());
         return records.stream().map(taskRecord -> taskRecord.toTask()).collect(Collectors.toList());
+    }
+
+    @Override
+    public void completeTask(String userId, Instant startTime, Instant endTime) {
+        TaskRecord partialRecord = TaskRecord.builder()
+                .userId(userId)
+                .timeStarted(startTime)
+                .timeEnded(endTime)
+                .build();
+        DynamoDBMapperConfig config = DynamoDBMapperConfig.builder().withSaveBehavior(DynamoDBMapperConfig.SaveBehavior.UPDATE_SKIP_NULL_ATTRIBUTES).build();
+        mapper.save(partialRecord, config);
     }
 
     @Override
