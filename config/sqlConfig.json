@@ -1,0 +1,8 @@
+{
+  "hostname": "",
+  "port": 5432,
+  "database": "time_tracker",
+  "schema": "time_tracker",
+  "username": "",
+  "password": ""
+}
