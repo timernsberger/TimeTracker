@@ -4,5 +4,7 @@ include 'core'
 project(':core').projectDir = file('../core')
 include 'database-core'
 project(':database-core').projectDir = file('../database-core')
+include 'database-sql'
+project(':database-sql').projectDir = file('../database-sql')
 include 'database-dynamodb'
 project(':database-dynamodb').projectDir = file('../database-dynamodb')

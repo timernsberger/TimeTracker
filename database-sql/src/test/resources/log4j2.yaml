@@ -1,0 +1,5 @@
+Configuration:
+  appenders:
+  Loggers:
+    Root:
+      level: none
