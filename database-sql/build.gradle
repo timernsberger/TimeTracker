@@ -3,13 +3,14 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'io.ebean:ebean-gradle-plugin:11.5.3'
+        classpath 'io.ebean:ebean-gradle-plugin:11.11.1'
     }
 }
 
 plugins {
     id 'java'
     id 'idea'
+    id 'io.franzbecker.gradle-lombok' version '1.14'
 }
 
 apply plugin: 'io.ebean'
@@ -23,6 +24,13 @@ repositories {
     mavenCentral()
 }
 
+ebean {
+    debugLevel = 0
+    // this seems to be having issues, likely caused by using the deprecated "apt" dependency instead of "annotationProcessor"
+    // adding an annotationProcessor-type dependency will still cause bean generation even if this is false
+    queryBeans = false
+}
+
 dependencies {
     compile project(':database-core')
 
@@ -32,8 +40,9 @@ dependencies {
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.6'
 
     compile group: 'org.postgresql', name: 'postgresql', version: '42.2.5'
+    annotationProcessor group: 'io.ebean', name: 'ebean', version: '11.22.4'
     compile group: 'io.ebean', name: 'ebean', version: '11.22.4'
-    compile group: 'io.ebean', name: 'querybean-generator', version: '11.19.1'
+    annotationProcessor group: 'io.ebean', name: 'querybean-generator', version: '11.19.1'
     compile group: 'io.ebean', name: 'ebean-querybean', version: '11.20.1'
 
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.2.0'
@@ -46,15 +55,6 @@ dependencies {
     testRuntime group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.11.1'
     testRuntime group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.0'
     testRuntime group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: '2.9.0'
-}
-
-configurations {
-    apt
-}
-
-ebean {
-    debugLevel = 9
-    queryBeans = true
 }
 
 idea {
