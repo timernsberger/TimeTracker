@@ -4,7 +4,6 @@ buildscript {
 }
 
 plugins {
-    id 'io.franzbecker.gradle-lombok' version '1.14'
     id 'java'
 }
 
@@ -22,7 +21,11 @@ dependencies {
     compile project(':database-core')
     compile project(':database-dynamodb')
 
-    compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.21'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.1'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-web', version: '2.11.1'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.0'
+    compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: '2.9.0'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.11.1'
     compile group: 'org.projectlombok', name: 'lombok', version: '1.16.18'
 
     compile group: 'org.jboss.resteasy', name: 'resteasy-jaxrs', version: restEasyVersion

@@ -1,0 +1,21 @@
+Configuration:
+  appenders:
+    Console:
+      name: Console
+      PatternLayout:
+        Pattern: "%d %-5p %C: %m%n"
+    RollingFile:
+      name: File
+      filePattern: "logs/service-%d{MM-dd-yyyy}-%i.log.gz"
+      Policies:
+        TimeBasedTriggeringPolicy:
+          interval: 1
+      PatternLayout:
+        Pattern: "%d %-5p %C: %m%n"
+  Loggers:
+    logger:
+    Root:
+      level: info
+      AppenderRef:
+        - ref: File
+        - ref: Console
