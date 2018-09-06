@@ -18,7 +18,7 @@ import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.notNullValue;
 
-public class DynamoTaskTypeDaoTest extends DaoTestBase {
+public class TaskTypeDaoTest extends DaoTestBase {
     private DynamoTaskTypeDao dao;
 
     @BeforeEach
